@@ -5,11 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0](https://github.com/paradigmxyz/reth-core/releases/tag/v0.7.0) - 2026-08-26
+
+### Dependencies
+
+- Bump revm to 43.0.0 ([#43](https://github.com/paradigmxyz/reth-core/issues/43))
+
+## [0.6.0](https://github.com/paradigmxyz/reth-core/releases/tag/v0.6.0) - 2026-07-31
+
+### Dependencies
+
+- Bump revm to 42.0.0 ([#41](https://github.com/paradigmxyz/reth-core/issues/41))
+
+### Miscellaneous Tasks
+
+- Release 0.6.0
+
+### Testing
+
+- [codecs] Assert rlp encoded byte roundtrips ([#39](https://github.com/paradigmxyz/reth-core/issues/39))
+
 ## [0.5.2](https://github.com/paradigmxyz/reth-core/releases/tag/v0.5.2) - 2026-06-18
 
 ### Features
 
 - [primitives-traits] Impl PartialEq for SealedOrRecoveredBlock ([#34](https://github.com/paradigmxyz/reth-core/issues/34))
+
+### Miscellaneous Tasks
+
+- Release 0.5.2
 
 ## [0.5.1](https://github.com/paradigmxyz/reth-core/releases/tag/v0.5.1) - 2026-06-15
 
