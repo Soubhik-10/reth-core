@@ -254,7 +254,8 @@ mod tests {
         let tx: EthereumTxEnvelope<TxEip4844> = EthereumTxEnvelope::Eip8141(
             TxEip8141 {
                 chain_id: 1,
-                nonce: 7,
+                nonce_keys: vec![alloy_primitives::U256::from(1)],
+                nonce_seq: 7,
                 sender: Address::repeat_byte(0x11),
                 ..Default::default()
             }
