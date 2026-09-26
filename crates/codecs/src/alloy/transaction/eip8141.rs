@@ -27,13 +27,14 @@ impl Compact for TxEip8141 {
 mod tests {
     use super::*;
     use alloy_eips::eip8141::{Frame, FrameMode};
-    use alloy_primitives::{Address, Bytes};
+    use alloy_primitives::{Address, Bytes, U256};
 
     #[test]
     fn frame_transaction_roundtrip() {
         let tx = TxEip8141 {
             chain_id: 1,
-            nonce: 7,
+            nonce_keys: vec![U256::from(1), U256::from(2)],
+            nonce_seq: 7,
             sender: Address::repeat_byte(0x11),
             frames: vec![Frame {
                 mode: FrameMode::Sender,
