@@ -45,7 +45,8 @@ pub struct Account {
 }
 
 /// Returned when an operation requires an extensionless account representation.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, thiserror::Error)]
+#[error("account extensions are not supported")]
 pub struct AccountExtensionsUnsupported;
 
 /// Rejects operations that cannot represent chain-specific account payloads.
@@ -59,11 +60,43 @@ pub const fn ensure_no_account_extensions() -> Result<(), AccountExtensionsUnsup
 
 #[cfg(test)]
 mod account_extension_tests {
-    use super::{ensure_no_account_extensions, Account};
+    use super::{ensure_no_account_extensions, Account, AccountExtensionsUnsupported};
+    use alloc::string::ToString;
+    use alloy_primitives::{B256, U256};
 
     #[test]
     fn rejects_extension_builds() {
         assert_eq!(ensure_no_account_extensions().is_ok(), !Account::EXTENSIONS_ENABLED);
+    }
+
+    #[test]
+    fn unsupported_extensions_display() {
+        assert_eq!(
+            AccountExtensionsUnsupported.to_string(),
+            "account extensions are not supported"
+        );
+    }
+
+    #[test]
+    fn new_has_no_extension() {
+        let account = Account::new(7, U256::from(42), Some(B256::repeat_byte(1)));
+        assert_eq!(account.nonce, 7);
+        assert_eq!(account.balance, U256::from(42));
+        assert_eq!(account.bytecode_hash, Some(B256::repeat_byte(1)));
+        assert!(!account.has_extension());
+    }
+
+    #[cfg(feature = "account-ext")]
+    #[test]
+    fn with_extension_sets_extension() {
+        let extension = alloy_trie::AccountExtension::copy_from_slice(&[0x82, 0xaa]);
+        let account = Account::new(7, U256::from(42), Some(B256::repeat_byte(1)))
+            .with_extension(extension.clone());
+        assert_eq!(account.nonce, 7);
+        assert_eq!(account.balance, U256::from(42));
+        assert_eq!(account.bytecode_hash, Some(B256::repeat_byte(1)));
+        assert_eq!(account.extension, extension);
+        assert!(account.has_extension());
     }
 }
 
@@ -78,6 +111,29 @@ struct LegacyAccount {
 impl Account {
     /// Whether this build can carry chain-specific account payloads.
     pub const EXTENSIONS_ENABLED: bool = cfg!(feature = "account-ext");
+
+    /// Creates an account with an empty extension.
+    ///
+    /// The extension carries chain-specific data and only exists with the `account-ext` feature.
+    /// Use `with_extension` to attach one.
+    pub const fn new(nonce: u64, balance: U256, bytecode_hash: Option<B256>) -> Self {
+        Self {
+            nonce,
+            balance,
+            bytecode_hash,
+            #[cfg(feature = "account-ext")]
+            extension: alloy_trie::AccountExtension::new(),
+        }
+    }
+
+    /// Returns this account with the given chain-specific extension.
+    ///
+    /// This replaces the extension, which [`Self::new`] leaves empty.
+    #[cfg(feature = "account-ext")]
+    pub fn with_extension(mut self, extension: impl Into<alloy_trie::AccountExtension>) -> Self {
+        self.extension = extension.into();
+        self
+    }
 
     /// Whether this account has a nonempty chain-specific payload.
     pub const fn has_extension(&self) -> bool {
